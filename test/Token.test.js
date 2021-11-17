@@ -3,7 +3,7 @@ const Token = artifacts.require("./Token");
 
 require("chai").use(require("chai-as-promised")).should();
 
-contract("Token", ([deployer, reciever]) => {
+contract("Token", ([deployer, reciever, exchange]) => {
   let token;
   const name = "DApp Token";
   const symbol = "DAPP";
@@ -77,7 +77,7 @@ contract("Token", ([deployer, reciever]) => {
         //   console.log("reciever balance after transfer", balanceOf.toString());
       });
 
-      it("emits a transfer event", () => {
+      it("emits a Transfer event", () => {
         const log = result.logs[0];
         log.event.should.equal("Transfer");
         const event = log.args;
@@ -108,6 +108,38 @@ contract("Token", ([deployer, reciever]) => {
           .transfer(0x0, amount, { from: deployer })
           .should.be.rejectedWith(INVALID_ADDRESS);
       });
+    });
+  });
+
+  describe("approving tokens", () => {
+    let result;
+    let amount;
+
+    beforeEach(async () => {
+      amount = tokens(100);
+      result = await token.approve(exchange, amount, { from: deployer });
+    });
+
+    describe("success", () => {
+      it("allocates an allowance for delegated token spending", async () => {
+        const allowance = await token.allowance(deployer, exchange);
+        allowance.toString().should.be.equal(amount.toString());
+      });
+
+      it("emits an Approval event", async () => {
+        const log = result.logs[0];
+        log.event.should.equal("Approval");
+        const event = log.args;
+        event.owner.toString().should.equal(deployer, "owner is correct");
+        event.spender.toString().should.equal(exchange, "spender is correct");
+        event.value
+          .toString()
+          .should.equal(amount.toString(), "value is correct");
+      });
+    });
+
+    describe("failure", () => {
+      it("");
     });
   });
 });
