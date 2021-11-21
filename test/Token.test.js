@@ -145,7 +145,7 @@ contract("Token", ([deployer, reciever, exchange]) => {
     });
   });
 
-  describe("sending tokens", () => {
+  describe("delegated token transfers", () => {
     let result;
     let amount;
 
@@ -197,9 +197,7 @@ contract("Token", ([deployer, reciever, exchange]) => {
           .transferFrom(deployer, reciever, invalidAmount, { from: deployer })
           .should.be.rejectedWith(EVM_REVERT);
       });
-    });
 
-    describe("failure", () => {
       it("rejects invalid recipients", async () => {
         await token.transferFrom(deployer, 0x0, amount, { from: exchange })
           .should.be.rejected;
